@@ -18,23 +18,25 @@ def validate_entry(text: str) -> None:
     assert "\n" not in text, "Entry must not contain newline characters"
     assert "\r" not in text, "Entry must not contain carriage return characters"
     assert not text.isspace(), "Entry must not be only whitespace"
+    assert text == text.strip(), "Entry must not contain leading or trailing whitespace"
     # Verify valid UTF-8 encoding
     text.encode("utf-8")
 
 
-def main() -> None:
+def write_entry(dest: Path = Path("/output/entry.txt")) -> Path:
+    """Validate entry and write single line to destination file."""
     validate_entry(ENTRY)
-
-    output_dir = Path("/output")
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    output_file = output_dir / "entry.txt"
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write(ENTRY + "\n")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(f"{ENTRY}\n", encoding="utf-8")
 
     # Post-write verification
-    written = output_file.read_text(encoding="utf-8")
-    assert written == ENTRY + "\n", "Written output must match entry with trailing newline"
+    written = dest.read_text(encoding="utf-8")
+    assert written == f"{ENTRY}\n", "Written output must match entry with trailing newline"
+    return dest
+
+
+def main() -> None:
+    write_entry()
 
 
 if __name__ == "__main__":
